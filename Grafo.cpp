@@ -1,46 +1,46 @@
 #include <iostream>
 #define MAX_NODI 100
-#define INF 1000000000 // Rappresenta l'assenza di connessione
+#define INF 1000000000 // Indica assenza di collegamento
 
 template <typename T>
-class Grafo {
+class StrutturaGrafo {
 private:
-    T nodi[MAX_NODI]; // Array dei nodi
-    int matriceAdiacenza[MAX_NODI][MAX_NODI]; // Matrice di adiacenza
-    bool esisteNodo[MAX_NODI]; // Indica se un nodo esiste
-    int numeroNodi = 0; // Numero attuale di nodi
+    T elementi[MAX_NODI]; // Nodi del grafo
+    int matriceAdiacenza[MAX_NODI][MAX_NODI]; // Matrice di connessione
+    bool nodiPresenti[MAX_NODI]; // Stato dei nodi
+    int numeroNodi = 0; // Contatore dei nodi
 
 public:
     // Costruttore
-    Grafo() {
+    StrutturaGrafo() {
         for (int i = 0; i < MAX_NODI; ++i) {
-            esisteNodo[i] = false;
+            nodiPresenti[i] = false;
             for (int j = 0; j < MAX_NODI; ++j) {
                 matriceAdiacenza[i][j] = INF;
             }
-            matriceAdiacenza[i][i] = 0; // La distanza da un nodo a se stesso è 0
+            matriceAdiacenza[i][i] = 0; // Nessun costo tra un nodo e se stesso
         }
     }
 
-    // Aggiunge un nodo al grafo, in input viene inserito il valore che rappresenta quel nodo (es. nome della cittá)
-    void aggiungiNodo(const T& nodo) {
+    // Inserisce un nuovo nodo
+    void inserisciNodo(const T& elemento) {
         if (numeroNodi >= MAX_NODI) {
             std::cout << "Errore: numero massimo di nodi raggiunto.\n";
             return;
         }
         for (int i = 0; i < numeroNodi; ++i) {
-            if (esisteNodo[i] && nodi[i] == nodo) {
+            if (nodiPresenti[i] && elementi[i] == elemento) {
                 std::cout << "Errore: il nodo esiste già.\n";
                 return;
             }
         }
-        nodi[numeroNodi] = nodo;
-        esisteNodo[numeroNodi] = true;
+        elementi[numeroNodi] = elemento;
+        nodiPresenti[numeroNodi] = true;
         numeroNodi++;
     }
 
-    // Aggiunge un arco tra due nodi dando in input i nomi dei nodi e il peso del loro arco
-    void aggiungiArco(const T& sorgente, const T& destinazione, int peso) {
+    // Inserisce un arco tra due nodi con un peso specifico
+    void inserisciArco(const T& sorgente, const T& destinazione, int peso) {
         int indiceSorgente = trovaIndice(sorgente);
         int indiceDestinazione = trovaIndice(destinazione);
 
@@ -51,22 +51,22 @@ public:
         matriceAdiacenza[indiceSorgente][indiceDestinazione] = peso;
     }
 
-    // Rimuove un nodo dando in input il nome del nodo
-    void rimuoviNodo(const T& nodo) {
-        int indice = trovaIndice(nodo);
+    // Rimuove un nodo
+    void eliminaNodo(const T& elemento) {
+        int indice = trovaIndice(elemento);
         if (indice == -1) {
             std::cout << "Errore: il nodo non esiste.\n";
             return;
         }
-        esisteNodo[indice] = false;
+        nodiPresenti[indice] = false;
         for (int i = 0; i < MAX_NODI; ++i) {
             matriceAdiacenza[indice][i] = INF;
             matriceAdiacenza[i][indice] = INF;
         }
     }
 
-    // Rimuove un arco tra due nodi dando in input il nome del nodo di partenza e del nodo di arrivo
-    void rimuoviArco(const T& sorgente, const T& destinazione) {
+    // Rimuove un arco tra due nodi
+    void eliminaArco(const T& sorgente, const T& destinazione) {
         int indiceSorgente = trovaIndice(sorgente);
         int indiceDestinazione = trovaIndice(destinazione);
 
@@ -77,30 +77,30 @@ public:
         matriceAdiacenza[indiceSorgente][indiceDestinazione] = INF;
     }
 
-    // Restituisce i nodi adiacenti a un dato nodo
-    void nodiAdiacenti(const T& nodo) const {
-        int indice = trovaIndice(nodo);
+    // Elenca i nodi connessi a un nodo specifico
+    void mostraConnessi(const T& elemento) const {
+        int indice = trovaIndice(elemento);
         if (indice == -1) {
             std::cout << "Errore: il nodo non esiste.\n";
             return;
         }
-        std::cout << "Nodi adiacenti a " << nodo << ": ";
+        std::cout << "Nodi connessi a " << elemento << ": ";
         for (int i = 0; i < numeroNodi; ++i) {
-            if (esisteNodo[i] && matriceAdiacenza[indice][i] != INF) {
-                std::cout << nodi[i] << " (peso: " << matriceAdiacenza[indice][i] << ") ";
+            if (nodiPresenti[i] && matriceAdiacenza[indice][i] != INF) {
+                std::cout << elementi[i] << " (peso: " << matriceAdiacenza[indice][i] << ") ";
             }
         }
         std::cout << "\n";
     }
 
-    // Stampa la matrice di adiacenza
-    void stampa() const {
+    // Visualizza la matrice di adiacenza
+    void mostraMatrice() const {
         std::cout << "Matrice di Adiacenza:\n";
         for (int i = 0; i < numeroNodi; ++i) {
-            if (!esisteNodo[i]) continue;
+            if (!nodiPresenti[i]) continue;
 
             for (int j = 0; j < numeroNodi; ++j) {
-                if (!esisteNodo[j]) continue;
+                if (!nodiPresenti[j]) continue;
 
                 if (matriceAdiacenza[i][j] == INF) {
                     std::cout << "INF ";
@@ -112,13 +112,13 @@ public:
         }
     }
 
-    // Verifica se un nodo esiste
-    bool verificaNodo(const T& nodo) const {
-        return trovaIndice(nodo) != -1;
+    // Verifica l'esistenza di un nodo
+    bool presenzaNodo(const T& elemento) const {
+        return trovaIndice(elemento) != -1;
     }
 
-    // Verifica se un arco esiste
-    bool verificaArco(const T& sorgente, const T& destinazione) const {
+    // Verifica l'esistenza di un arco
+    bool presenzaArco(const T& sorgente, const T& destinazione) const {
         int indiceSorgente = trovaIndice(sorgente);
         int indiceDestinazione = trovaIndice(destinazione);
 
@@ -127,15 +127,34 @@ public:
         }
         return matriceAdiacenza[indiceSorgente][indiceDestinazione] != INF;
     }
-    
-private:
+
     // Trova l'indice di un nodo
-    int trovaIndice(const T& nodo) const {
+    int trovaIndice(const T& elemento) const {
         for (int i = 0; i < numeroNodi; ++i) {
-            if (esisteNodo[i] && nodi[i] == nodo) {
+            if (nodiPresenti[i] && elementi[i] == elemento) {
                 return i;
             }
         }
         return -1;
+    }
+
+    // Individua l'arco con peso minimo da un nodo
+    int arcoMinimo(const T& elemento) const {
+        int indice = trovaIndice(elemento);
+        if (indice == -1) {
+            std::cout << "Errore: il nodo non esiste.\n";
+            return -1;
+        }
+
+        int pesoMinimo = INF;
+        for (int i = 0; i < numeroNodi; ++i) {
+            if (nodiPresenti[i] && matriceAdiacenza[indice][i] != INF) {
+                if (matriceAdiacenza[indice][i] < pesoMinimo) {
+                    pesoMinimo = matriceAdiacenza[indice][i];
+                }
+            }
+        }
+
+        return (pesoMinimo == INF) ? -1 : pesoMinimo;
     }
 };
